@@ -195,7 +195,26 @@ class RopeMode(object):
 
     @decorators.local_command('a c', 'P')
     def show_calltip(self, prefix):
-        self._base_show_doc(prefix, self.get_calltip())
+        calltip = self.get_calltip()
+        if calltip:
+            self.env.message(calltip)
+        else:
+            self.env.message('No calltip available')
+
+    @decorators.local_function()
+    def get_description(self):
+        self._check_project()
+        def _get_doc(project, text, offset, *args, **kwds):
+            return codeassist.get_calltip(project, text, offset, *args, **kwds)
+        return self._base_get_doc(_get_doc)
+
+    @decorators.local_command('a s', 'P')
+    def show_description(self, prefix):
+        descr = self.get_description()
+        if descr:
+            self.env.message(descr)
+        else:
+            self.env.message('No description available')
 
     def _base_show_doc(self, prefix, docs):
         if docs:
